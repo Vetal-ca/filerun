@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "filerun.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "filerun.labels" . | nindent 4 }}
+spec:
+  serviceName:  {{ .Chart.Name }}
+  replicas: 1
+  selector:
+    matchLabels:
+      app:  {{ .Chart.Name }}
+      app.kubernetes.io/component:  {{ .Chart.Name }}
+  template:
+    metadata:
+      labels:
+        app:  {{ .Chart.Name }}
+        app.kubernetes.io/component:  {{ .Chart.Name }}
+    spec:
+{{/*      securityContext:*/}}
+{{/*        runAsUser: {{ .Values.runAsUser }}*/}}
+{{/*        runAsGroup: {{ .Values.runAsUser }}*/}}
+{{/*        fsGroup: {{ .Values.runAsUser }}*/}}
+
+      containers:
+        - image: "{{ .Values.image.name }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          name:  {{ .Chart.Name }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          env:
+            - name: FR_DB_HOST
+              value: {{ .Values.db.host | quote}}
+            - name: FR_DB_PORT
+              value: {{ .Values.db.port | quote }}
+            - name: FR_DB_NAME
+              value: {{ .Values.db.name | quote }}
+            - name: FR_DB_USER
+              value: {{ .Values.db.user | quote }}
+            - name: FR_DB_PASS
+              value: {{ .Values.db.password | quote }}
+            - name: APACHE_RUN_USER
+              value: {{ .Values.data.user | quote }}
+            - name: APACHE_RUN_USER_ID
+              value: {{ .Values.data.uid  | quote }}
+            - name: APACHE_RUN_GROUP
+              value: {{ .Values.data.group | quote }}
+            - name: APACHE_RUN_GROUP_ID
+              value: {{ .Values.data.gid  | quote }}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+
