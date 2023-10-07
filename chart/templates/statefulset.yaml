@@ -60,4 +60,14 @@ spec:
               port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+  volumeClaimTemplates:
+    - metadata:
+        name: user-data
+      spec:
+        accessModes:
+          - "ReadWriteOnce"
+        resources:
+          requests:
+            storage: {{ .Values.storage.userData.size }}
+        storageClassName: {{ default "default" .Values.storage.userData.class }}
 

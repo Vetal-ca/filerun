@@ -68,3 +68,9 @@ resources: {}
   #   cpu: 100m
   #   memory: 128Mi
 
+storage:
+  userData:
+    ## @param storage.size Storage size for /data
+    ##
+    size: "40Gi"
+    class: "default"
